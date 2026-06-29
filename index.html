@@ -1,1 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tipo de Cambio BCB</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: #0f172a;
+    color: #f1f5f9;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+  }
+  .card {
+    background: #1e293b;
+    border-radius: 24px;
+    padding: 2.5rem 2rem;
+    text-align: center;
+    width: 100%;
+    max-width: 340px;
+    box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+  }
+  .label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    color: #64748b;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+  }
+  .subtitle {
+    font-size: 13px;
+    color: #94a3b8;
+    margin-bottom: 2rem;
+  }
+  .amount {
+    font-size: 72px;
+    font-weight: 800;
+    color: #38bdf8;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+    letter-spacing: -2px;
+  }
+  .currency {
+    font-size: 16px;
+    color: #64748b;
+    margin-bottom: 2rem;
+  }
+  .fecha {
+    background: #0f172a;
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    font-size: 13px;
+    color: #94a3b8;
+    margin-bottom: 1.5rem;
+  }
+  .fecha span { color: #f1f5f9; font-weight: 600; }
+  .btn {
+    background: #38bdf8;
+    color: #0f172a;
+    border: none;
+    border-radius: 12px;
+    padding: 0.75rem 1.5rem;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    width: 100%;
+  }
+  .btn:active { opacity: 0.8; }
+  .error { color: #f87171; font-size: 14px; margin-top: 1rem; }
+  .loading { color: #64748b; font-size: 14px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="label">Banco Central de Bolivia</div>
+  <div class="subtitle">Tipo de Cambio Oficial</div>
+  <div class="amount" id="tc">—</div>
+  <div class="currency">Bolivianos por Dólar USD</div>
+  <div class="fecha">Vigente: <span id="fecha">cargando...</span></div>
+  <button class="btn" onclick="cargar()">↻ Actualizar</button>
+  <div class="error" id="error"></div>
+</div>
 
+<script>
+const URL = "https://script.google.com/a/macros/unifranz.edu.bo/s/AKfycbxhM0l56cVa_BrbcylV9_ZqbTE9KpR5sDDphIvX8X8pGSXn5jZRyRhz2G1iFtqHJI_cEA/exec";
+
+async function cargar() {
+  document.getElementById('tc').textContent = '…';
+  document.getElementById('error').textContent = '';
+  try {
+    const r = await fetch(URL);
+    const data = await r.json();
+    if (data.estado === 'ok') {
+      document.getElementById('tc').textContent = data.tipo_cambio.toFixed(2);
+      document.getElementById('fecha').textContent = data.fecha;
+    } else {
+      document.getElementById('error').textContent = 'Error: ' + data.mensaje;
+    }
+  } catch(e) {
+    document.getElementById('error').textContent = 'Sin conexión al servidor.';
+  }
+}
+
+cargar();
+</script>
+</body>
+</html>
