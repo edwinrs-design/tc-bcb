@@ -139,6 +139,15 @@
 <script>
 const URL = "https://script.google.com/macros/s/AKfycbxhM0l56cVa_BrbcylV9_ZqbTE9KpR5sDDphIvX8X8pGSXn5jZRyRhz2G1iFtqHJI_cEA/exec";
 
+function formatFecha(date) {
+  return date.toLocaleDateString('es-BO', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  }).toUpperCase();
+}
+
 function setValor(idValor, idFecha, obj) {
   var el = document.getElementById(idValor);
   if (!obj || obj.valor === 0) {
@@ -158,14 +167,19 @@ async function cargar() {
     const r = await fetch(URL);
     const data = await r.json();
     if (data.estado === 'ok' || data.hoy) {
+      var hoyDate = new Date();
+      var ayerDate = new Date();
+      ayerDate.setDate(ayerDate.getDate() - 1);
+
+      data.ayer.fecha = formatFecha(ayerDate);
+      data.hoy.fecha = formatFecha(hoyDate);
+
       setValor('tc-ayer', 'fecha-ayer', data.ayer);
-      // Fecha de hoy desde el dispositivo
-      data.hoy.fecha = new Date().toLocaleDateString('es-BO', {weekday:'long', day:'numeric', month:'long', year:'numeric'}).toUpperCase();
       setValor('tc-hoy', 'fecha-hoy', data.hoy);
       setValor('tc-manana', 'fecha-manana', data.manana);
-      var now = new Date();
+
       document.getElementById('updated').textContent =
-        'Actualizado: ' + now.toLocaleTimeString('es-BO');
+        'Actualizado: ' + hoyDate.toLocaleTimeString('es-BO');
     } else {
       document.getElementById('error').textContent = 'Error: ' + data.mensaje;
     }
