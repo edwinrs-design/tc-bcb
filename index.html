@@ -159,6 +159,8 @@ async function cargar() {
     const data = await r.json();
     if (data.estado === 'ok' || data.hoy) {
       setValor('tc-ayer', 'fecha-ayer', data.ayer);
+      // Fecha de hoy desde el dispositivo
+      data.hoy.fecha = new Date().toLocaleDateString('es-BO', {weekday:'long', day:'numeric', month:'long', year:'numeric'}).toUpperCase();
       setValor('tc-hoy', 'fecha-hoy', data.hoy);
       setValor('tc-manana', 'fecha-manana', data.manana);
       var now = new Date();
