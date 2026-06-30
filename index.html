@@ -19,91 +19,157 @@
   .card {
     background: #1e293b;
     border-radius: 24px;
-    padding: 2.5rem 2rem;
-    text-align: center;
+    padding: 2rem;
     width: 100%;
-    max-width: 340px;
+    max-width: 360px;
     box-shadow: 0 25px 50px rgba(0,0,0,0.4);
   }
+  .header {
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
   .label {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 700;
     letter-spacing: 0.15em;
     color: #64748b;
     text-transform: uppercase;
-    margin-bottom: 0.5rem;
   }
   .subtitle {
     font-size: 13px;
     color: #94a3b8;
-    margin-bottom: 2rem;
+    margin-top: 4px;
   }
-  .amount {
-    font-size: 72px;
-    font-weight: 800;
-    color: #38bdf8;
-    line-height: 1;
-    margin-bottom: 0.5rem;
-    letter-spacing: -2px;
-  }
-  .currency {
-    font-size: 16px;
-    color: #64748b;
-    margin-bottom: 2rem;
-  }
-  .fecha {
+  .row {
     background: #0f172a;
-    border-radius: 12px;
-    padding: 0.75rem 1rem;
-    font-size: 13px;
-    color: #94a3b8;
-    margin-bottom: 1.5rem;
+    border-radius: 16px;
+    padding: 1rem 1.25rem;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
-  .fecha span { color: #f1f5f9; font-weight: 600; }
+  .row.hoy {
+    background: #0c4a6e;
+    border: 1px solid #38bdf8;
+  }
+  .row-left .dia {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #64748b;
+  }
+  .row.hoy .row-left .dia { color: #7dd3fc; }
+  .row-left .fecha {
+    font-size: 11px;
+    color: #475569;
+    margin-top: 2px;
+  }
+  .row.hoy .row-left .fecha { color: #7dd3fc; }
+  .valor {
+    font-size: 32px;
+    font-weight: 800;
+    color: #94a3b8;
+    letter-spacing: -1px;
+  }
+  .row.hoy .valor { color: #38bdf8; }
+  .valor.cero { color: #334155; }
+  .currency {
+    text-align: center;
+    font-size: 11px;
+    color: #475569;
+    margin-bottom: 1.5rem;
+    letter-spacing: 0.05em;
+  }
   .btn {
     background: #38bdf8;
     color: #0f172a;
     border: none;
     border-radius: 12px;
-    padding: 0.75rem 1.5rem;
+    padding: 0.75rem;
     font-size: 14px;
     font-weight: 700;
     cursor: pointer;
     width: 100%;
   }
   .btn:active { opacity: 0.8; }
-  .error { color: #f87171; font-size: 14px; margin-top: 1rem; }
-  .loading { color: #64748b; font-size: 14px; }
+  .error { color: #f87171; font-size: 12px; margin-top: 0.75rem; text-align: center; }
+  .updated { text-align: center; font-size: 11px; color: #334155; margin-top: 0.75rem; }
 </style>
 </head>
 <body>
 <div class="card">
-  <div class="label">Banco Central de Bolivia</div>
-  <div class="subtitle">Tipo de Cambio Oficial</div>
-  <div class="amount" id="tc">—</div>
-  <div class="currency">Bolivianos por Dólar USD</div>
-  <div class="fecha">Vigente: <span id="fecha">cargando...</span></div>
+  <div class="header">
+    <div class="label">Banco Central de Bolivia</div>
+    <div class="subtitle">Tipo de Cambio Oficial · BOB/USD</div>
+  </div>
+
+  <div class="row" id="row-ayer">
+    <div class="row-left">
+      <div class="dia">Ayer</div>
+      <div class="fecha" id="fecha-ayer">—</div>
+    </div>
+    <div class="valor" id="tc-ayer">—</div>
+  </div>
+
+  <div class="row hoy" id="row-hoy">
+    <div class="row-left">
+      <div class="dia">Hoy</div>
+      <div class="fecha" id="fecha-hoy">—</div>
+    </div>
+    <div class="valor" id="tc-hoy">—</div>
+  </div>
+
+  <div class="row" id="row-manana">
+    <div class="row-left">
+      <div class="dia">Mañana</div>
+      <div class="fecha" id="fecha-manana">—</div>
+    </div>
+    <div class="valor" id="tc-manana">—</div>
+  </div>
+
+  <div class="currency">Bolivianos por Dólar Estadounidense</div>
+
   <button class="btn" onclick="cargar()">↻ Actualizar</button>
   <div class="error" id="error"></div>
+  <div class="updated" id="updated"></div>
 </div>
 
 <script>
-const URL = "https://script.google.com/a/macros/unifranz.edu.bo/s/AKfycbxhM0l56cVa_BrbcylV9_ZqbTE9KpR5sDDphIvX8X8pGSXn5jZRyRhz2G1iFtqHJI_cEA/exec";
+const URL = "https://script.google.com/macros/s/AKfycbxhM0l56cVa_BrbcylV9_ZqbTE9KpR5sDDphIvX8X8pGSXn5jZRyRhz2G1iFtqHJI_cEA/exec";
+
+function setValor(idValor, idFecha, obj) {
+  var el = document.getElementById(idValor);
+  if (!obj || obj.valor === 0) {
+    el.textContent = "0";
+    el.classList.add("cero");
+  } else {
+    el.textContent = obj.valor.toFixed(2);
+    el.classList.remove("cero");
+  }
+  document.getElementById(idFecha).textContent = (obj && obj.fecha) ? obj.fecha : "—";
+}
 
 async function cargar() {
-  document.getElementById('tc').textContent = '…';
   document.getElementById('error').textContent = '';
+  document.getElementById('updated').textContent = 'Cargando...';
   try {
     const r = await fetch(URL);
     const data = await r.json();
-    if (data.estado === 'ok') {
-      document.getElementById('tc').textContent = data.tipo_cambio.toFixed(2);
-      document.getElementById('fecha').textContent = data.fecha;
+    if (data.estado === 'ok' || data.hoy) {
+      setValor('tc-ayer', 'fecha-ayer', data.ayer);
+      setValor('tc-hoy', 'fecha-hoy', data.hoy);
+      setValor('tc-manana', 'fecha-manana', data.manana);
+      var now = new Date();
+      document.getElementById('updated').textContent =
+        'Actualizado: ' + now.toLocaleTimeString('es-BO');
     } else {
       document.getElementById('error').textContent = 'Error: ' + data.mensaje;
     }
   } catch(e) {
     document.getElementById('error').textContent = 'Sin conexión al servidor.';
+    document.getElementById('updated').textContent = '';
   }
 }
 
